@@ -1,0 +1,26 @@
+{
+  "name": "1st_practice",
+  "version": "1.0.0",
+  "description": "이 프로젝트는 Git과 GitHub를 이용한 버전 관리 학습을 위한 토이 프로젝트입니다.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/newkimdh/1st_Practice.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/newkimdh/1st_Practice/issues"
+  },
+  "homepage": "https://github.com/newkimdh/1st_Practice#readme",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "mongoose": "^8.17.1"
+  }
+}
