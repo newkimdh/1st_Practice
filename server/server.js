@@ -28,7 +28,9 @@ const memoSchema = new mongoose.Schema({
     memo_title: String,
     memo_content: String,
     // 새롭게 추가된 필드: 어떤 사용자의 메모인지 식별
-    memo_userID: { type: String, required: true }
+    memo_userID: { type: String, required: true },
+    // 작성 시간을 저장하는 필드
+    createdAt: { type: Date, default: Date.now }
 });
 
 // Memo 모델 생성
@@ -77,7 +79,6 @@ app.get('/', (req, res) => {
     res.redirect('/signup.html'); // 클라이언트를 login.html로 리다이렉트합니다.
 });
 
-
 // 'POST /login' 라우트
 // login.html 폼에서 로그인 요청이 들어왔을 때 실행됩니다.
 // req.body를 사용하려면 body-parser와 같은 미들웨어가 필요하지만,
@@ -105,7 +106,7 @@ app.post('/login', async (req, res) => {
         if (isMatch) {
             req.session.user = { id: user.id };
             console.log('로그인 성공:', user.id);
-            res.redirect('/memo_form.html');
+            res.redirect('/memo_list.html');
         } else {
             console.log('로그인 실패: 비밀번호 불일치');
             return res.status(401).send("<script>alert('비밀번호가 일치하지 않습니다.'); history.back();</script>");
@@ -115,6 +116,16 @@ app.post('/login', async (req, res) => {
         console.error('로그인 중 오류 발생:', err);
         res.status(500).send("<script>alert('로그인 중 오류가 발생했습니다.'); history.back();</script>");
     }
+});
+
+app.post('/logout', async (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            console.error('로그아웃 중 오류 발생:', err);
+            return res.status(500).send("<script>alert('로그아웃 중 오류가 발생했습니다.'); history.back();</script>");
+        }
+        res.redirect('/login.html');
+    });
 });
 
 // 'POST /signup' 라우트
@@ -191,9 +202,9 @@ app.post('/memo', async (req, res) => {
         // 생성한 메모를 MongoDB에 저장합니다. await 키워드를 사용해 저장이 완료될 때까지 기다립니다.
         await newMemo.save();
 
-        console.log('새로운 메모가 성공적으로 저장되었습니다:');
+        console.log('새로운 메모가 성공적으로 저장되었습니다:', userID);
         // 메모 저장 성공 시, alert 메시지를 띄우고 memo_form.html로 리다이렉트합니다.
-        res.status(201).send("<script>alert('메모를 성공적으로 작성하였습니다!'); window.location.href = '/memo_form.html';</script>");
+        res.status(201).send("<script>alert('메모를 성공적으로 작성하였습니다!'); window.location.href = '/memo_list.html';</script>");
     
     } catch (err) {
         // 오류 발생 시 오류 메시지를 콘솔에 출력하고, 클라이언트에게 오류 응답을 보냅니다.
@@ -214,10 +225,13 @@ app.get('/memo', async (req, res) => {
         }
 
         // 특정 사용자의 메모만 DB에서 조회합니다.
-        const userMemos = await Memo.find({ memo_userID : userID });
+        const userMemos = await Memo.find({ memo_userID : userID }).sort({ createdAt: -1 }); // 작성 시간(createdAt)을 기준으로 내림차순 정렬합니다.
 
-        // 조회한 메모 목록을 JSON 형식으로 응답합니다.
-        res.status(200).json(userMemos);
+        // 유저 ID와 조회한 메모 목록을 JSON 형식으로 응답합니다.
+        res.status(200).json({
+            userID: userID,
+            memos: userMemos
+        });
 
     } catch (err) {
         console.error('메모 목록 조회 중 오류 발생:', err);
