@@ -7,18 +7,19 @@
     <title>메모 게시판</title>
 </head>
 <body>
+    <form id="logout-form" action="/logout" method="post">
+        <button type="submit" class="logout-btn">로그아웃</button>
+    </form>
     <div>
     <h1>새 메모 작성</h1>
-        <form id="logout-form" action="/logout" method="post">
-            <button type="submit" class="logout-btn">로그아웃</button>
-        </form>
+        
         <form action="/memo" method="post">
             <div class="form-group">
                 <label for="memo_type">메모 종류:</label>
                 <select id="memo_type" name="memo_type" required>
-                    <option value="general">오늘의 일기</option>
-                    <option value="programming">프로그래밍</option>
-                    <option value="etc">기타</option>
+                    <option value="일기">일기</option>
+                    <option value="프로그래밍">프로그래밍</option>
+                    <option value="기타">기타</option>
                 </select>
             </div>
             <div class="form-group">
@@ -31,5 +32,8 @@
             </div>
             <button type="submit">작성하기</button>
         </form>
+    </div>
+    <div>
+        <a href="/memo_list.html">내 메모 목록 보기</a>
     </div>
 </html>
