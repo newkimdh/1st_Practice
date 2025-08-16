@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 메모 목록</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="./styles/memo_list.css">
+</head>
+<body>
+    <form id="logout-form" action="/logout" method="post">
+        <button type="submit" class="logout-btn">로그아웃</button>
+    </form>
+    <div class="container">
+        <h1 class="title">
+            <p id="user-name"></p> 님의 메모 목록
+        </h1>
+        
+        <div id="memo-list" class="memo-list-container">
+            <!-- 메모 목록이 여기에 동적으로 추가됩니다 -->
+            <div class="loading-message">메모를 불러오는 중...</div>
+        </div>
+        
+        <div class="link-container">
+            <a href="/memo_form.html" class="link-to-form">새 메모 작성하기</a>
+        </div>
+    </div>
+
+    <script>
+        $(function() {
+            const nameTag = $('#user-name');
+
+            const memoListContainer = document.getElementById('memo-list');
+
+            // 날짜를 YYYY-MM-DD HH:MM:SS 형식으로 변환하는 함수
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                const seconds = String(date.getSeconds()).padStart(2, '0');
+                return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+            }
+
+            async function fetchMemos() {
+                try {
+                    const response = await fetch(window.location.origin + '/memo');
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || '메모를 가져오는 데 실패했습니다.');
+                    }
+
+                    const data = await response.json();
+                    const userID = data.userID
+                    const memos = data.memos;
+
+                    nameTag.text(`${userID}`);
+                    const loadingMessage = document.querySelector('.loading-message');
+                    if (loadingMessage) {
+                        loadingMessage.remove();
+                    }
+
+                    if (memos.length === 0) {
+                        memoListContainer.innerHTML = '<div class="no-memos">아직 작성된 메모가 없습니다.</div>';
+                        return;
+                    }
+
+                    memos.forEach(memo => {
+                        const memoDiv = document.createElement('div');
+                        memoDiv.className = 'memo-item';
+
+                        const headerDiv = document.createElement('div');
+                        headerDiv.className = 'memo-header';
+
+                        const title = document.createElement('h3');
+                        title.className = 'memo-title';
+                        title.textContent = `[${memo.memo_type}] ${memo.memo_title}`;
+
+                        const createdAt = document.createElement('p');
+                        createdAt.className = 'memo-date';
+                        createdAt.textContent = formatDate(memo.createdAt);
+
+                        const content = document.createElement('p');
+                        content.className = 'memo-content';
+                        content.textContent = memo.memo_content;
+
+                        headerDiv.appendChild(title);
+                        headerDiv.appendChild(createdAt);
+                        memoDiv.appendChild(headerDiv);
+                        memoDiv.appendChild(content);
+                        memoListContainer.appendChild(memoDiv);
+                    });
+
+                } catch (error) {
+                    console.error('메모 목록을 불러오는 중 오류 발생:', error);
+                    memoListContainer.innerHTML = `<div class="error-message">오류 발생: ${error.message}</div>`;
+                }
+            }
+
+            fetchMemos();
+        });
+    </script>
+</body>
+</html>
