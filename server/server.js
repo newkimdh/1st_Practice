@@ -52,5 +52,5 @@ app.use(session({
 app.use('/users', userRoutes);
 app.use('/memo', memoRoutes); 
 app.get('/', (req, res) => {
-    res.redirect('/signup.html'); // 클라이언트를 login.html로 리다이렉트합니다.
+    res.redirect('/login.html'); // 클라이언트를 login.html로 리다이렉트합니다.
 });
